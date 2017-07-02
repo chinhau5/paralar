@@ -15,6 +15,7 @@
 #include "rr_graph.h"
 #include "read_xml_arch_file.h"
 #include "ReadOptions.h"
+#include "paralar.h"
 
 /***************** Variables shared only by route modules *******************/
 
@@ -279,15 +280,27 @@ boolean try_route(int width_fac, struct s_router_opts router_opts,
 
 	init_route_structs(router_opts.bb_factor);
 
-	if (router_opts.router_algorithm == BREADTH_FIRST) {
-		vpr_printf(TIO_MESSAGE_INFO, "Confirming Router Algorithm: BREADTH_FIRST.\n");
-		success = try_breadth_first_route(router_opts, clb_opins_used_locally,
-				width_fac);
-	} else { /* TIMING_DRIVEN route */
-		vpr_printf(TIO_MESSAGE_INFO, "Confirming Router Algorithm: TIMING_DRIVEN.\n");
-		assert(router_opts.route_type != GLOBAL);
-		success = try_timing_driven_route(router_opts, net_delay, slacks,
-			clb_opins_used_locally,timing_inf.timing_analysis_enabled);
+	switch (router_opts.router_algorithm) {
+		case BREADTH_FIRST:
+			vpr_printf(TIO_MESSAGE_INFO, "Confirming Router Algorithm: BREADTH_FIRST.\n");
+			success = try_breadth_first_route(router_opts, clb_opins_used_locally,
+					width_fac);
+			break;
+		case TIMING_DRIVEN:
+			vpr_printf(TIO_MESSAGE_INFO, "Confirming Router Algorithm: TIMING_DRIVEN.\n");
+			assert(router_opts.route_type != GLOBAL);
+			success = try_timing_driven_route(router_opts, net_delay, slacks,
+					clb_opins_used_locally,timing_inf.timing_analysis_enabled);
+			break;
+		case PARALAR:
+			vpr_printf(TIO_MESSAGE_INFO, "Confirming Router Algorithm: PARALAR.\n");
+			success = paralar(router_opts, net_delay, slacks,
+					clb_opins_used_locally,timing_inf.timing_analysis_enabled);
+			break;
+		default:
+			printf("Invalid router algorithm %d\n", router_opts.router_algorithm);
+			assert(false);
+			break;
 	}
 
 	free_rr_node_route_structs();

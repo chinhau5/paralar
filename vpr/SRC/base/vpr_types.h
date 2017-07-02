@@ -683,7 +683,7 @@ enum e_route_type {
 	GLOBAL, DETAILED
 };
 enum e_router_algorithm {
-	BREADTH_FIRST, TIMING_DRIVEN, NO_TIMING
+    BREADTH_FIRST, TIMING_DRIVEN, PARALAR, NO_TIMING
 };
 enum e_base_cost_type {
 	INTRINSIC_DELAY, DELAY_NORMALIZED, DEMAND_ONLY

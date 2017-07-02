@@ -814,6 +814,9 @@ ReadRouterAlgorithm(INP char **Args, OUTP enum e_router_algorithm *Algo) {
 	case OT_TIMING_DRIVEN:
 		*Algo = TIMING_DRIVEN;
 		break;
+    case OT_PARALAR:
+        *Algo = PARALAR;
+        break;
 	default:
 		Error(*PrevArgs);
 	}

@@ -178,6 +178,9 @@ static void ShowRouterOpts(INP struct s_router_opts RouterOpts) {
 		case TIMING_DRIVEN:
 			vpr_printf(TIO_MESSAGE_INFO, "TIMING_DRIVEN\n");
 			break;
+        case PARALAR:
+            vpr_printf(TIO_MESSAGE_INFO, "PARALAR\n");
+            break;
 		case NO_TIMING:
 			vpr_printf(TIO_MESSAGE_INFO, "NO_TIMING\n");
 			break;

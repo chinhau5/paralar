@@ -1,0 +1,59 @@
+BUILD_ROOT = newbuild
+
+LIBS = vpr/build/libvpr.a libarchfpga/build/libarchfpga.a printhandler/build/libprinthandler.a pcre/build/libpcre.a  
+SUB_DIRS = vpr libarchfpga printhandler pcre
+
+LIB_DIR = /usr/local/lib /usr/lib/openmpi /home/chinhau5/zlog/lib /home/chinhau5/Downloads/metis-5.1.0/build/Linux-x86_64/libmetis
+#LIB_DIR += /home/chinhau5/Downloads/tbb2017_20161128oss/lib/intel64/gcc4.7
+LIB_DIR += /home/chinhau5/Downloads/tbb-2017_U6/build/linux_intel64_gcc_cc6.3.1_libc2.25_kernel4.9.28_release
+#LIB_DIR += /home/chinhau5/Downloads/tbb-2017_U6/build/linux_intel64_gcc_cc6.3.1_libc2.25_kernel4.9.28_debug
+
+LIB_CMD = $(addprefix -L,$(LIB_DIR))
+
+comma = ,
+RPATH = $(addprefix -Wl$(comma)-rpath$(comma), $(LIB_DIR))
+
+#LINK_LIBS = X11 pthread lttng-ust dl m rt zlog boost_timer boost_system boost_thread tbb metis mpi mpi_cxx papi
+LINK_LIBS = X11 pthread dl m rt zlog boost_timer boost_system boost_thread tbb metis mpi mpi_cxx
+LINK_LIBS := $(addprefix -l,$(LINK_LIBS))
+LINK_LIBS += /opt/intel/vtune_amplifier_xe/lib64/libittnotify.a
+#LINK_LIBS += -ltbbmalloc_proxy
+CXX = g++
+
+OPT = -O2
+
+#$(firstword $(subst /, ,$(1)))
+
+.DELETE_ON_ERROR:
+
+define generateRules
+$(1)_$(2): 
+	@echo Building $$@
+	cd $(1) && $$(MAKE) -f Makefile.clang $(2)
+endef
+
+#$(firstword $(subst /, ,$(1)))_all:
+	#@echo Building $$@
+	#cd $(firstword $(subst /, ,$(1))) && $$(MAKE) -f Makefile.clang all
+
+define generateLibRules
+$(1): $(firstword $(subst /, ,$(1)))_all
+	@echo Done
+endef
+
+$(foreach sub_dir, $(SUB_DIRS), $(eval $(call generateRules,$(sub_dir),all)))
+$(foreach sub_dir, $(SUB_DIRS), $(eval $(call generateRules,$(sub_dir),clean)))
+$(foreach lib, $(LIBS), $(eval $(call generateLibRules,$(lib),all)))
+
+$(BUILD_ROOT):
+	mkdir -p $(BUILD_ROOT)
+
+$(BUILD_ROOT)/Router: $(LIBS) | $(BUILD_ROOT) 
+	$(CXX) $(OPT) $(LIB_CMD) $(RPATH) $(LIBS) $(LINK_LIBS) -o $@
+
+.PHONY: all clean $(addsuffix _clean,$(SUB_DIRS)) $(addsuffix _all,$(SUB_DIRS))
+
+all: $(BUILD_ROOT)/Router
+
+clean: $(addsuffix _clean,$(SUB_DIRS))
+	rm -f $(BUILD_ROOT)/Router
